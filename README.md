@@ -8,8 +8,17 @@ The Python binding (`vrep.py` and friends) and the driver libraries (`remoteApi.
 
 Add the path to your V-REP installation to your `PATH`:
 
-- (Windows) C:/Program Files/V-REP3/V-REP_PRO_EDU/
-- (Mac OS X) /Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/
+- (Windows) might be something like `C:/Program Files/V-REP3/V-REP_PRO_EDU/`
+
+  ```bash
+  $ set PATH=%PATH%;C:/Program Files/V-REP3/V-REP_PRO_EDU/
+  ```
+
+- (Mac OS X) might be something like `/Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/`
+
+  ```bash
+  $ export PATH=$PATH:"/Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/"
+  ```
 
 Then run the following:
 
