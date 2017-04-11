@@ -25,11 +25,18 @@ class instance():
         self.args = args
     def start(self):
         print('(instance) starting...')
-        self.inst = sp.Popen(self.args)
+        try:
+            self.inst = sp.Popen(self.args)
+        except FileNotFoundError:
+            print('(vrepper) Error: cannot find vrep executable at',self.args[0])
+            raise
+
         return self
+    def isAlive(self):
+        return True if self.inst.poll() is None else False
     def end(self):
         print('(instance) terminating...')
-        if self.inst.poll() is None:
+        if self.isAlive():
             self.inst.terminate()
             retcode = self.inst.wait()
         else:
@@ -43,38 +50,25 @@ import inspect, platform
 
 blocking = vrep.simx_opmode_blocking
 class vrepper():
-    def __init__(self,port_num=None):
+    def __init__(self,port_num=None,dir_vrep=''):
         if port_num is None:
             port_num = int(random.random()*1000 + 19999)
 
         self.port_num = port_num
 
-        # 1. determine the platform we're running on
-        running_os = ''
-        if platform.system() == 'Windows' or platform.system() == 'cli':
-            running_os = 'win'
-        elif platform.system() == 'Darwin':
-            running_os = 'osx'
+        if dir_vrep=='':
+            print('(vrepper) trying to find V-REP executable in your PATH')
+            import distutils.spawn as dsp
+            path_vrep = dsp.find_executable('vrep')
         else:
-            running_os = 'linux'
-
-        print('(vrepper) we are running on',running_os)
-        self.running_os = running_os
-
-        # determine the location of V-REP (Education version)
-        if running_os == 'win':
-            dir_vrep = "C:/Program Files/V-REP3/V-REP_PRO_EDU/"
-        elif running_os == 'osx':
-            dir_vrep = '/Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/'
-        else:
-            raise RuntimeError('Current OS not supported by this piece of code.')
+            print('(vrepper) we assume your V-REP executable is located at:',dir_vrep)
+            path_vrep = dir_vrep + 'vrep'
 
         # start V-REP in a sub process
         # vrep.exe -gREMOTEAPISERVERSERVICE_PORT_DEBUG_PREENABLESYNC
         # where PORT -> 19997, DEBUG -> FALSE, PREENABLESYNC -> TRUE
         # by default the server will start at 19997,
         # use the -g argument if you want to start the server on a different port.
-        path_vrep = dir_vrep + 'vrep'
         args = [path_vrep, '-gREMOTEAPISERVERSERVICE_'+str(self.port_num)+'_FALSE_TRUE']
 
         # instance created but not started.
@@ -248,6 +242,27 @@ class vrepobject():
 
 if __name__ == '__main__':
     import os
+
+    # # determine the platform we're running on
+    # running_os = ''
+    # if platform.system() == 'Windows' or platform.system() == 'cli':
+    #     running_os = 'win'
+    # elif platform.system() == 'Darwin':
+    #     running_os = 'osx'
+    # else:
+    #     running_os = 'linux'
+    #
+    # print('(main) we are running on',running_os)
+    #
+    # # locate V-REP (Education Version)
+    # if running_os == 'win':
+    #     dir_vrep = "C:/Program Files/V-REP3/V-REP_PRO_EDU/"
+    # elif running_os == 'osx':
+    #     dir_vrep = '/Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/'
+    # else:
+    #     raise RuntimeError('Current OS not supported by this piece of code.')
+    #
+    # venv = vrepper(dir_vrep=dir_vrep)
 
     venv = vrepper()
     venv.start()
