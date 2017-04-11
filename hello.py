@@ -61,8 +61,8 @@ class vrepper():
             import distutils.spawn as dsp
             path_vrep = dsp.find_executable('vrep')
         else:
-            print('(vrepper) we assume your V-REP executable is located at:',dir_vrep)
             path_vrep = dir_vrep + 'vrep'
+        print('(vrepper) path to your V-REP executable is:',path_vrep)
 
         # start V-REP in a sub process
         # vrep.exe -gREMOTEAPISERVERSERVICE_PORT_DEBUG_PREENABLESYNC
