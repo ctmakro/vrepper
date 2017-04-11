@@ -161,16 +161,25 @@ class vrepper():
 
     def load_scene(self,fullpathname):
         print('(vrepper) loading scene from',fullpathname)
-        ret = self.simxLoadScene(fullpathname,
-            0, # assume file is at server side
-            blocking)
-
-        if ret == vrep.simx_return_ok:
-            print('(vrepper) scene successfully loaded')
-            return True
-        else:
+        try:
+            check_ret(self.simxLoadScene(fullpathname,
+                0, # assume file is at server side
+                blocking))
+        except:
             print('(vrepper) scene loading failure')
-            return False
+            raise
+        print('(vrepper) scene successfully loaded')
+
+    def start_blocking_simulation(self):
+        check_ret(venv.simxSynchronous(True))
+        check_ret(venv.simxStartSimulation(blocking))
+
+    def stop_blocking_simulation(self):
+        check_ret(venv.simxStopSimulation(blocking))
+        check_ret(venv.simxSynchronous(False))
+
+    def step_blocking_simulation(self):
+        check_ret(venv.simxSynchronousTrigger())
 
     def get_object_handle(self,name):
         handle, = check_ret(self.simxGetObjectHandle(name,blocking))
@@ -191,7 +200,7 @@ def check_ret(ret_tuple):
     else:
         ret = ret_tuple[0]
     if ret!=vrep.simx_return_ok:
-        raise RuntimeError('retcode not OK, API call failed')
+        raise RuntimeError('retcode not OK, API call failed. Check the paramters!')
 
     return ret_tuple[1:] if istuple else None
 
@@ -221,6 +230,12 @@ class vrepobject():
             blocking))
         # linearVel, angularVel
 
+    def set_velocity(self,v):
+        return check_ret(self.env.simxSetJointTargetVelocity(
+            self.handle,
+            v,
+            blocking))
+
     def read_force_sensor(self):
         state,forceVector,torqueVector = check_ret(self.env.simxReadForceSensor(
             self.handle,
@@ -238,29 +253,30 @@ if __name__ == '__main__':
     venv.start()
 
     # load scene
-    if not venv.load_scene(os.getcwd() + '/scenes/body_joint_wheel.ttt'):
-        venv.end()
+    venv.load_scene(os.getcwd() + '/scenes/body_joint_wheel.ttt')
 
     body = venv.get_object_by_name('body')
     wheel = venv.get_object_by_name('wheel')
+    joint = venv.get_object_by_name('joint')
 
-    print(body.handle)
-    print(wheel.handle)
+    print(body.handle,wheel.handle,joint.handle)
 
-    check_ret(venv.simxSynchronous(True))
-    check_ret(venv.simxStartSimulation(blocking))
+    venv.start_blocking_simulation()
 
     for i in range(100):
         print('simulation step',i)
-        check_ret(venv.simxSynchronousTrigger())
-        print(body.get_position())
-        print(wheel.get_orientation())
+        print('body position',body.get_position())
+        print('wheel orientation',wheel.get_orientation())
+
+        joint.set_velocity(10 * math.sin(i/5))
+        # you should see things moving back and forth
+
+        venv.step_blocking_simulation() # forward 1 timestep
         time.sleep(.01)
 
     # stop the simulation and reset the scene:
-    check_ret(venv.simxStopSimulation(blocking))
-    check_ret(venv.simxSynchronous(False))
+    venv.stop_blocking_simulation()
 
-    print('simulation ended.')
-    time.sleep(10)
+    print('simulation ended. clean up in 5 seconds...')
+    time.sleep(5)
     venv.end()
