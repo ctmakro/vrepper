@@ -6,6 +6,13 @@ The Python binding (`vrep.py` and friends) and the driver libraries (`remoteApi.
 
 ## How to
 
+Add the path to your V-REP installation to your `PATH`:
+
+- (Windows) C:/Program Files/V-REP3/V-REP_PRO_EDU/
+- (Mac OS X) /Users/chia/V-REP_PRO_EDU/vrep.app/Contents/MacOS/
+
+Then run the following:
+
 ```bash
 $ ipython hello.py
 ```
