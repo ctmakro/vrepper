@@ -23,7 +23,7 @@ Add the path to your V-REP installation to your `PATH`:
 Then run the following:
 
 ```bash
-$ ipython hello.py
+$ ipython vrepper.py
 ```
 
 The command above will start V-REP and run a simple simulation step-by-step. Then it will shut itself down and exit.
