@@ -49,6 +49,7 @@ import time, types, math, random
 import inspect, platform
 
 blocking = vrep.simx_opmode_blocking
+oneshot = vrep.simx_opmode_oneshot
 class vrepper():
     def __init__(self,port_num=None,dir_vrep=''):
         if port_num is None:
@@ -115,7 +116,7 @@ class vrepper():
                 waitUntilConnected=True,
                 doNotReconnectOnceDisconnected=True,
                 timeOutInMs=1000,
-                commThreadCycleInMs=5) # Connect to V-REP
+                commThreadCycleInMs=1) # Connect to V-REP
 
             if self.cid != -1:
                 print ('(vrepper)Connected to remote API server!')
@@ -138,6 +139,7 @@ class vrepper():
             '(vrepper)Hello V-REP!',
             vrep.simx_opmode_oneshot)
         print('(vrepper) V-REP instance started, remote API connection created. Everything seems to be ready.')
+
         self.started = True
         return self
 
@@ -165,18 +167,16 @@ class vrepper():
         print('(vrepper) scene successfully loaded')
 
     def start_blocking_simulation(self):
+        # enter sync mode
         check_ret(self.simxSynchronous(True))
         check_ret(self.simxStartSimulation(blocking))
-        check_ret(self.simxGetPingTime())
 
     def stop_blocking_simulation(self):
         check_ret(self.simxStopSimulation(blocking))
-        check_ret(self.simxGetPingTime())
-        # check_ret(self.simxSynchronous(False))
+        time.sleep(1)
 
     def step_blocking_simulation(self):
         check_ret(self.simxSynchronousTrigger())
-        check_ret(self.simxGetPingTime())
 
     def get_object_handle(self,name):
         handle, = check_ret(self.simxGetObjectHandle(name,blocking))
@@ -286,10 +286,10 @@ if __name__ == '__main__':
 
     print(body.handle,wheel.handle,joint.handle)
 
-    for j in range(2):
+    for j in range(5):
         venv.start_blocking_simulation()
 
-        for i in range(100):
+        for i in range(20):
             print('simulation step',i)
             print('body position',body.get_position())
             print('wheel orientation',wheel.get_orientation())
@@ -298,7 +298,6 @@ if __name__ == '__main__':
             # you should see things moving back and forth
 
             venv.step_blocking_simulation() # forward 1 timestep
-            time.sleep(.01)
 
         # stop the simulation and reset the scene:
         venv.stop_blocking_simulation()
