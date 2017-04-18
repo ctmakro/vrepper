@@ -165,15 +165,18 @@ class vrepper():
         print('(vrepper) scene successfully loaded')
 
     def start_blocking_simulation(self):
-        check_ret(venv.simxSynchronous(True))
-        check_ret(venv.simxStartSimulation(blocking))
+        check_ret(self.simxSynchronous(True))
+        check_ret(self.simxStartSimulation(blocking))
+        check_ret(self.simxGetPingTime())
 
     def stop_blocking_simulation(self):
-        check_ret(venv.simxStopSimulation(blocking))
-        check_ret(venv.simxSynchronous(False))
+        check_ret(self.simxStopSimulation(blocking))
+        check_ret(self.simxGetPingTime())
+        # check_ret(self.simxSynchronous(False))
 
     def step_blocking_simulation(self):
-        check_ret(venv.simxSynchronousTrigger())
+        check_ret(self.simxSynchronousTrigger())
+        check_ret(self.simxGetPingTime())
 
     def get_object_handle(self,name):
         handle, = check_ret(self.simxGetObjectHandle(name,blocking))
@@ -193,8 +196,9 @@ def check_ret(ret_tuple):
         ret = ret_tuple
     else:
         ret = ret_tuple[0]
+
     if ret!=vrep.simx_return_ok:
-        raise RuntimeError('retcode not OK, API call failed. Check the paramters!')
+        raise RuntimeError('retcode('+str(ret)+') not OK, API call failed. Check the paramters!')
 
     return ret_tuple[1:] if istuple else None
 
@@ -228,6 +232,12 @@ class vrepobject():
         return check_ret(self.env.simxSetJointTargetVelocity(
             self.handle,
             v,
+            blocking))
+
+    def set_force(self,f):
+        return check_ret(self.env.simxSetJointForce(
+            self.handle,
+            f,
             blocking))
 
     def read_force_sensor(self):
@@ -276,21 +286,22 @@ if __name__ == '__main__':
 
     print(body.handle,wheel.handle,joint.handle)
 
-    venv.start_blocking_simulation()
+    for j in range(2):
+        venv.start_blocking_simulation()
 
-    for i in range(100):
-        print('simulation step',i)
-        print('body position',body.get_position())
-        print('wheel orientation',wheel.get_orientation())
+        for i in range(100):
+            print('simulation step',i)
+            print('body position',body.get_position())
+            print('wheel orientation',wheel.get_orientation())
 
-        joint.set_velocity(10 * math.sin(i/5))
-        # you should see things moving back and forth
+            joint.set_velocity(10 * math.sin(i/5))
+            # you should see things moving back and forth
 
-        venv.step_blocking_simulation() # forward 1 timestep
-        time.sleep(.01)
+            venv.step_blocking_simulation() # forward 1 timestep
+            time.sleep(.01)
 
-    # stop the simulation and reset the scene:
-    venv.stop_blocking_simulation()
+        # stop the simulation and reset the scene:
+        venv.stop_blocking_simulation()
 
     print('simulation ended. clean up in 5 seconds...')
     time.sleep(5)
