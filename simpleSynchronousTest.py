@@ -46,25 +46,25 @@ import sys
 
 print ('Program started')
 vrep.simxFinish(-1) # just in case, close all opened connections
-clientID=vrep.simxStart('127.0.0.1',19997,True,True,5000,5) # Connect to V-REP
+clientID=vrep.simxStart('127.0.0.1',19997,True,True,5000,1) # Connect to V-REP
 if clientID!=-1:
     print ('Connected to remote API server')
-
     # enable the synchronous mode on the client:
     vrep.simxSynchronous(clientID,True)
-
     for j in range(5):
-        print('sim',j)
+        print('simulation',j)
+
+        time.sleep(.5) # magic delay
+
         # start the simulation:
         e = vrep.simxStartSimulation(clientID,vrep.simx_opmode_blocking)
-
         print('start',e)
 
         # Now step a few times:
         for i in range(30):
             e = vrep.simxSynchronousTrigger(clientID)
             print('synct',e)
-            # check_ret(self.simxGetPingTime())
+            # wait till simulation step finish
             e = vrep.simxGetPingTime(clientID)
             print('getping',e)
 
