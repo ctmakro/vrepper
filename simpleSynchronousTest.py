@@ -1,14 +1,14 @@
-# Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved. 
+# Copyright 2006-2017 Coppelia Robotics GmbH. All rights reserved.
 # marc@coppeliarobotics.com
 # www.coppeliarobotics.com
-# 
+#
 # -------------------------------------------------------------------
 # THIS FILE IS DISTRIBUTED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
 # WARRANTY. THE USER WILL USE IT AT HIS/HER OWN RISK. THE ORIGINAL
 # AUTHORS AND COPPELIA ROBOTICS GMBH WILL NOT BE LIABLE FOR DATA LOSS,
 # DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR
 # MISUSING THIS SOFTWARE.
-# 
+#
 # You are free to use/modify/distribute this file for whatever purpose!
 # -------------------------------------------------------------------
 #
@@ -53,19 +53,24 @@ if clientID!=-1:
     # enable the synchronous mode on the client:
     vrep.simxSynchronous(clientID,True)
 
-    # start the simulation:
-    vrep.simxStartSimulation(clientID,vrep.simx_opmode_blocking)
+    for j in range(5):
+        print('sim',j)
+        # start the simulation:
+        e = vrep.simxStartSimulation(clientID,vrep.simx_opmode_blocking)
 
-    # Now step a few times:
-    for i in range(1,10):
-        if sys.version_info[0] == 3:
-            input('Press <enter> key to step the simulation!')
-        else:
-            raw_input('Press <enter> key to step the simulation!')
-        vrep.simxSynchronousTrigger(clientID);
+        print('start',e)
 
-    # stop the simulation:
-    vrep.simxStopSimulation(clientID,vrep.simx_opmode_blocking)
+        # Now step a few times:
+        for i in range(30):
+            e = vrep.simxSynchronousTrigger(clientID)
+            print('synct',e)
+            # check_ret(self.simxGetPingTime())
+            e = vrep.simxGetPingTime(clientID)
+            print('getping',e)
+
+        # stop the simulation:
+        e=vrep.simxStopSimulation(clientID,vrep.simx_opmode_blocking)
+        print('stop',e)
 
     # Now close the connection to V-REP:
     vrep.simxFinish(clientID)
