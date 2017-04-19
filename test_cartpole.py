@@ -68,6 +68,5 @@ if __name__ == '__main__':
           observation, reward, done, info = env.step(action)
           print(reward)
 
-    print('simulation ended. clean up in 5 seconds...')
+    print('simulation ended. leaving in 5 seconds...')
     time.sleep(5)
-    env._destroy()

@@ -19,16 +19,24 @@ except:
 
 import subprocess as sp
 
+list_of_instances = []
+import atexit
+def cleanup(): # kill all spawned subprocesses on exit
+    for i in list_of_instances:
+        i.end()
+atexit.register(cleanup)
+
 # the class holding a subprocess instance.
 class instance():
     def __init__(self,args):
         self.args = args
+        list_of_instances.append(self)
     def start(self):
         print('(instance) starting...')
         try:
             self.inst = sp.Popen(self.args)
         except FileNotFoundError:
-            print('(vrepper) Error: cannot find vrep executable at',self.args[0])
+            print('(instance) Error: cannot find executable at',self.args[0])
             raise
 
         return self
@@ -138,6 +146,10 @@ class vrepper():
         self.simxAddStatusbarMessage(
             '(vrepper)Hello V-REP!',
             vrep.simx_opmode_oneshot)
+
+        # setup a useless signal
+        self.simxSetIntegerSignal('asdf',1,blocking)
+
         print('(vrepper) V-REP instance started, remote API connection created. Everything seems to be ready.')
 
         self.started = True
@@ -167,13 +179,31 @@ class vrepper():
         print('(vrepper) scene successfully loaded')
 
     def start_blocking_simulation(self):
+        # IMPORTANT
+        # you should poll the server state to make sure
+        # the simulation completely stops before starting a new one
+        while True:
+            # poll the useless signal (to receive a message from server)
+            check_ret(self.simxGetIntegerSignal(
+                'asdf',blocking))
+
+            # check server state (within the received message)
+            e = self.simxGetInMessageInfo(
+                vrep.simx_headeroffset_server_state)
+
+            # check bit0
+            not_stopped = e[1] & 1
+
+            if not not_stopped:
+                break
+
         # enter sync mode
         check_ret(self.simxSynchronous(True))
         check_ret(self.simxStartSimulation(blocking))
 
     def stop_blocking_simulation(self):
         check_ret(self.simxStopSimulation(blocking))
-        time.sleep(1)
+        # time.sleep(1)
 
     def step_blocking_simulation(self):
         check_ret(self.simxSynchronousTrigger())
@@ -302,6 +332,5 @@ if __name__ == '__main__':
         # stop the simulation and reset the scene:
         venv.stop_blocking_simulation()
 
-    print('simulation ended. clean up in 5 seconds...')
+    print('simulation ended. leaving in 5 seconds...')
     time.sleep(5)
-    venv.end()
