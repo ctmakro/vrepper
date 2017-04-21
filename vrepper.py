@@ -59,7 +59,7 @@ import inspect, platform
 blocking = vrep.simx_opmode_blocking
 oneshot = vrep.simx_opmode_oneshot
 class vrepper():
-    def __init__(self,port_num=None,dir_vrep=''):
+    def __init__(self,port_num=None,dir_vrep='',headless=False):
         if port_num is None:
             port_num = int(random.random()*1000 + 19999)
 
@@ -80,6 +80,9 @@ class vrepper():
         # use the -g argument if you want to start the server on a different port.
         args = [path_vrep, '-gREMOTEAPISERVERSERVICE_'+str(self.port_num)+'_FALSE_TRUE']
 
+        if headless:
+            args.append('-h')
+            
         # instance created but not started.
         self.instance = instance(args)
 

@@ -7,8 +7,8 @@ from gym import spaces
 from gym.utils import colorize, seeding
 
 class CartPoleVREPEnv(gym.Env):
-    def __init__(self):
-        self.venv = venv = vrepper()
+    def __init__(self,headless=False):
+        self.venv = venv = vrepper(headless=headless)
         venv.start()
         venv.load_scene(
             os.getcwd() + '/scenes/cart_pole.ttt')
@@ -59,7 +59,7 @@ class CartPoleVREPEnv(gym.Env):
         self.venv.end()
 
 if __name__ == '__main__':
-    env = CartPoleVREPEnv()
+    env = CartPoleVREPEnv(headless=True)
     for k in range(5):
         observation = env.reset()
         for _ in range(20):
