@@ -19,7 +19,7 @@ class CartPoleVREPEnv(gym.Env):
 
         print('(CartPoleVREP) initialized')
 
-        obs = np.array([np.inf]*3)
+        obs = np.array([np.inf]*6)
         act = np.array([1.])
 
         self.action_space = spaces.Box(-act,act)
@@ -29,7 +29,14 @@ class CartPoleVREPEnv(gym.Env):
         # observe then assign
         cartpos = self.cart.get_position()
         masspos = self.mass.get_position()
-        self.observation = np.array([cartpos[0],masspos[0],masspos[2]]).astype('float32')
+        cartvel,cart_angvel = self.cart.get_velocity()
+        massvel,mass_angvel = self.cart.get_velocity()
+
+        self.observation = np.array([
+            cartpos[0],cartvel[0],
+            masspos[0],masspos[2],
+            massvel[0],massvel[2]
+            ]).astype('float32')
 
     def _step(self,actions):
         actions = np.clip(actions, -1, 1)
@@ -43,7 +50,7 @@ class CartPoleVREPEnv(gym.Env):
         self._self_observe()
 
         # cost
-        height_of_mass = self.observation[2]
+        height_of_mass = self.observation[3] # masspos[2]
         cost = - height_of_mass + (v**2) * 0.001
 
         return self.observation, -cost, False, {}
