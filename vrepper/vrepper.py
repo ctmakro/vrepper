@@ -55,6 +55,7 @@ class instance():
 # class holding a v-rep simulation environment.
 import time, types, math, random
 import inspect, platform
+import numpy as np
 
 blocking = vrep.simx_opmode_blocking
 oneshot = vrep.simx_opmode_oneshot
@@ -282,6 +283,19 @@ class vrepobject():
             return None # sensor data not ready
         else:
             return forceVector, torqueVector
+
+    def get_vision_image(self):
+        resolution, image = check_ret(self.env.simxGetVisionSensorImage(
+            self.handle,
+            0, # options=0 -> RGB
+            blocking,
+        ))
+        dim,im = resolution,image
+        nim = np.array(im,dtype='uint8')
+        nim = np.reshape(nim,(dim[1],dim[0],3))
+        nim = np.flip(nim,0) # LR flip
+        nim = np.flip(nim,2) # RGB -> BGR
+        return nim
 
 if __name__ == '__main__':
     import os
