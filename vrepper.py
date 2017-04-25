@@ -82,7 +82,7 @@ class vrepper():
 
         if headless:
             args.append('-h')
-            
+
         # instance created but not started.
         self.instance = instance(args)
 
@@ -127,7 +127,7 @@ class vrepper():
                 waitUntilConnected=True,
                 doNotReconnectOnceDisconnected=True,
                 timeOutInMs=1000,
-                commThreadCycleInMs=1) # Connect to V-REP
+                commThreadCycleInMs=0) # Connect to V-REP
 
             if self.cid != -1:
                 print ('(vrepper)Connected to remote API server!')
