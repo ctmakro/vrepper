@@ -27,3 +27,12 @@ $ ipython vrepper.py
 ```
 
 The command above will start V-REP and run a simple simulation step-by-step. Then it will shut itself down and exit.
+
+## Why you should choose vrepper
+
+If you want:
+
+- lowest overhead in communication
+- repeatedly start/stop simulation to perform all kinds of experiment
+
+Then you should at least take a look at vrepper's source code.
