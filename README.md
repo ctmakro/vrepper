@@ -1,10 +1,10 @@
 # vrepper
 
-Tethered V-REP in Python.
+Tethered V-REP (using V-REP as a remote controlled multi-body simulator) in Python.
 
 The Python binding (`vrep.py` and friends) and the driver libraries (`remoteApi.dll` and `remoteApi.dylib`) is copied as-is from V-REP PRO EDU V3.4
 
-## How to
+## Usage
 
 Add the path to your V-REP installation to your `PATH`:
 
@@ -23,16 +23,24 @@ Add the path to your V-REP installation to your `PATH`:
 Then run the following:
 
 ```bash
-$ ipython vrepper.py
+$ cd vrepper
+$ pip install -e . #(install the vrepper package in edit mode)
+$ ipython test_body_joint.py #(run the example)
 ```
 
-The command above will start V-REP and run a simple simulation step-by-step. Then it will shut itself down and exit.
+The last command will start V-REP in headless mode (no GUI) and run a simple simulation step-by-step. Then it will shut itself down and exit.
 
-## Why you should choose vrepper
+## Why should you use V-REP
 
-If you want:
+- build your model with its GUI tools
+- simulate your model with whatever programming language you like
 
-- lowest overhead in communication
-- repeatedly start/stop simulation to perform all kinds of experiment
+## Why should you use vrepper
 
-Then you should at least take a look at vrepper's source code.
+If you are looking for:
+
+- remote controlled simulation
+- low overhead communication
+- ability to start/stop simulation repeatedly to perform all kinds of experiment
+
+Then vrepper has already paved the way for you. You should at least take a look at vrepper's source code.
