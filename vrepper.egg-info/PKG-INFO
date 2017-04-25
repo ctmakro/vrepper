@@ -1,0 +1,16 @@
+Metadata-Version: 1.1
+Name: vrepper
+Version: 0.0.1
+Summary: V-REP python tethering wrapper
+Home-page: https://github.com/ctmakro/vrepper
+Author: Qin Yongliang
+Author-email: ctmakro@gmail.com
+License: MIT
+Description: n/a
+Keywords: robotics vrep control simulation
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5

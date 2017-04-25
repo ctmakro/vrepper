@@ -1,10 +1,12 @@
-from vrepper import vrepper
+import vrepper
+from vrepper.vrepper import vrepper
+
 import os,time
 import numpy as np
 
 import gym
 from gym import spaces
-from gym.utils import colorize, seeding
+# from gym.utils import colorize, seeding
 
 class CartPoleVREPEnv(gym.Env):
     def __init__(self,headless=False):

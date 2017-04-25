@@ -5,7 +5,7 @@
 # import the vrep library
 try:
     print('trying to import vrep...')
-    import vrep
+    from . import vrep
     print('vrep imported.')
 except:
     print ('--------------------------------------------------------------')
