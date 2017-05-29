@@ -23,7 +23,7 @@ import subprocess as sp
 import warnings
 from inspect import getargspec
 
-from numpy import deg2rad
+from numpy import deg2rad, rad2deg
 
 list_of_instances = []
 import atexit
@@ -265,9 +265,8 @@ class vrepper():
             check_ret(self.simxSynchronous(sync))
 
     def stop_simulation(self):
-        check_ret(self.simxStopSimulation(blocking))
+        check_ret(self.simxStopSimulation(oneshot), ignore_one=True)
         self.sim_running = False
-        # time.sleep(1)
 
     @deprecated('Please use method "stop_simulation" instead.')
     def stop_blocking_simulation(self):
@@ -340,14 +339,14 @@ class vrepper():
 
 # check return tuple, raise error if retcode is not OK,
 # return remaining data otherwise
-def check_ret(ret_tuple):
+def check_ret(ret_tuple, ignore_one=False):
     istuple = isinstance(ret_tuple, tuple)
     if not istuple:
         ret = ret_tuple
     else:
         ret = ret_tuple[0]
 
-    if ret != vrep.simx_return_ok:
+    if (not ignore_one and ret != vrep.simx_return_ok) or (ignore_one and ret > 1):
         raise RuntimeError('retcode(' + str(ret) + ') not OK, API call failed. Check the paramters!')
 
     return ret_tuple[1:] if istuple else None
@@ -406,6 +405,16 @@ class vrepobject():
             self.handle,
             -deg2rad(angle),
             blocking))
+
+    def get_joint_angle(self):
+        self._check_joint()
+        angle = check_ret(
+            self.env.simxGetJointPosition(
+                self.handle,
+                blocking
+            )
+        )
+        return -rad2deg(angle[0])
 
     def read_force_sensor(self):
         state, forceVector, torqueVector = check_ret(self.env.simxReadForceSensor(
