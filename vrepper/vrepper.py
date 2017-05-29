@@ -19,6 +19,8 @@ except:
 
 import subprocess as sp
 
+from inspect import getargspec
+
 list_of_instances = []
 import atexit
 def cleanup(): # kill all spawned subprocesses on exit
@@ -69,7 +71,9 @@ class vrepper():
         if dir_vrep=='':
             print('(vrepper) trying to find V-REP executable in your PATH')
             import distutils.spawn as dsp
-            path_vrep = dsp.find_executable('vrep')
+            path_vrep = dsp.find_executable('vrep.sh') # fix for linux
+            if path_vrep == None:
+                path_vrep = dsp.find_executable('vrep')
         else:
             path_vrep = dir_vrep + 'vrep'
         print('(vrepper) path to your V-REP executable is:',path_vrep)
@@ -98,7 +102,7 @@ class vrepper():
 
         def assign_from_vrep_to_self(name):
             wrapee = getattr(vrep,name)
-            arg0 = inspect.getfullargspec(wrapee)[0][0]
+            arg0 = getargspec(wrapee)[0][0]
             if arg0 == 'clientID':
                 def func(*args,**kwargs):
                     return wrapee(self.cid,*args,**kwargs)
