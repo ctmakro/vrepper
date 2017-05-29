@@ -18,11 +18,12 @@ except:
     print ('')
     raise
 
+import functools
 import subprocess as sp
 import warnings
-import functools
-
 from inspect import getargspec
+
+from numpy import deg2rad
 
 list_of_instances = []
 import atexit
@@ -34,6 +35,7 @@ def cleanup():  # kill all spawned subprocesses on exit
 
 
 atexit.register(cleanup)
+
 
 def deprecated(msg=''):
     def dep(func):
@@ -50,8 +52,11 @@ def deprecated(msg=''):
                 lineno=func.func_code.co_firstlineno + 1
             )
             return func(*args, **kwargs)
+
         return new_func
+
     return deprecated
+
 
 # the class holding a subprocess instance.
 class instance():
@@ -126,6 +131,9 @@ class vrepper():
         # to differentiate between instances in the driver
 
         self.started = False
+
+        # is the simulation currently running (as far as we know)
+        self.sim_running = False
 
         # assign every API function call from vrep to self
         vrep_methods = [a for a in dir(vrep) if
@@ -245,9 +253,18 @@ class vrepper():
         # enter sync mode
         check_ret(self.simxSynchronous(is_sync))
         check_ret(self.simxStartSimulation(blocking))
+        self.sim_running = True
+
+    def make_simulation_synchronous(self, sync):
+        if not self.sim_running:
+            print('(vrepper) simulation doesn\'t seem to be running. starting up')
+            self.start_simulation(sync)
+        else:
+            check_ret(self.simxSynchronous(sync))
 
     def stop_simulation(self):
         check_ret(self.simxStopSimulation(blocking))
+        self.sim_running = False
         # time.sleep(1)
 
     @deprecated('Please use method "stop_simulation" instead.')
@@ -261,11 +278,25 @@ class vrepper():
         handle, = check_ret(self.simxGetObjectHandle(name, blocking))
         return handle
 
-    def get_object_by_handle(self, handle):
-        return vrepobject(self, handle)
+    def get_object_by_handle(self, handle, is_joint=True):
+        """
+        Get the vrep object for a given handle
 
-    def get_object_by_name(self, name):
-        return self.get_object_by_handle(self.get_object_handle(name))
+        :param int handle: handle code
+        :param bool is_joint: True if the object is a joint that can be moved
+        :returns: vrepobject
+        """
+        return vrepobject(self, handle, is_joint)
+
+    def get_object_by_name(self, name, is_joint=True):
+        """
+        Get the vrep object for a given name
+
+        :param str name: name of the object
+        :param bool is_joint: True if the object is a joint that can be moved
+        :returns: vrepobject
+        """
+        return self.get_object_by_handle(self.get_object_handle(name), is_joint)
 
     @staticmethod
     def create_params(ints=[], floats=[], strings=[], bytes=''):
@@ -321,9 +352,10 @@ def check_ret(ret_tuple):
 
 
 class vrepobject():
-    def __init__(self, env, handle):
+    def __init__(self, env, handle, is_joint=True):
         self.env = env
         self.handle = handle
+        self.is_joint = is_joint
 
     def get_orientation(self, relative_to=None):
         eulerAngles, = check_ret(self.env.simxGetObjectOrientation(
@@ -347,15 +379,30 @@ class vrepobject():
         # linearVel, angularVel
 
     def set_velocity(self, v):
+        self._check_joint()
         return check_ret(self.env.simxSetJointTargetVelocity(
             self.handle,
             v,
             blocking))
 
     def set_force(self, f):
+        self._check_joint()
         return check_ret(self.env.simxSetJointForce(
             self.handle,
             f,
+            blocking))
+
+    def set_position_target(self, angle):
+        """
+        Set desired position of a servo
+
+        :param int angle: target servo angle in degrees
+        :return: None if successful, otherwise raises exception
+        """
+        self._check_joint()
+        return check_ret(self.env.simxSetJointTargetPosition(
+            self.handle,
+            -deg2rad(angle),
             blocking))
 
     def read_force_sensor(self):
@@ -380,3 +427,7 @@ class vrepobject():
         nim = np.flip(nim, 0)  # LR flip
         nim = np.flip(nim, 2)  # RGB -> BGR
         return nim
+
+    def _check_joint(self):
+        if not self.is_joint:
+            raise Exception("Trying to call a joint function on a non-joint object.")
