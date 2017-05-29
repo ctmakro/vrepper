@@ -19,6 +19,8 @@ except:
     raise
 
 import subprocess as sp
+import warnings
+import functools
 
 from inspect import getargspec
 
@@ -33,6 +35,23 @@ def cleanup():  # kill all spawned subprocesses on exit
 
 atexit.register(cleanup)
 
+def deprecated(msg=''):
+    def dep(func):
+        '''This is a decorator which can be used to mark functions
+        as deprecated. It will result in a warning being emitted
+        when the function is used.'''
+
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            warnings.warn_explicit(
+                "Call to deprecated function {}. {}".format(func.__name__, msg),
+                category=DeprecationWarning,
+                filename=func.func_code.co_filename,
+                lineno=func.func_code.co_firstlineno + 1
+            )
+            return func(*args, **kwargs)
+        return new_func
+    return deprecated
 
 # the class holding a subprocess instance.
 class instance():
@@ -199,6 +218,12 @@ class vrepper():
         print('(vrepper) scene successfully loaded')
 
     def start_blocking_simulation(self):
+        self.start_simulation(True)
+
+    def start_nonblocking_simulation(self):
+        self.start_simulation(False)
+
+    def start_simulation(self, is_sync):
         # IMPORTANT
         # you should poll the server state to make sure
         # the simulation completely stops before starting a new one
@@ -218,12 +243,16 @@ class vrepper():
                 break
 
         # enter sync mode
-        check_ret(self.simxSynchronous(True))
+        check_ret(self.simxSynchronous(is_sync))
         check_ret(self.simxStartSimulation(blocking))
 
-    def stop_blocking_simulation(self):
+    def stop_simulation(self):
         check_ret(self.simxStopSimulation(blocking))
         # time.sleep(1)
+
+    @deprecated('Please use method "stop_simulation" instead.')
+    def stop_blocking_simulation(self):
+        self.stop_simulation()
 
     def step_blocking_simulation(self):
         check_ret(self.simxSynchronousTrigger())
