@@ -1,3 +1,12 @@
+vrepper/__init__.py
+vrepper/complexCommandTest.py
+vrepper/pathPlanningTest.py
+vrepper/simpleSynchronousTest.py
+vrepper/simpleTest.py
+vrepper/version.py
+vrepper/vrep.py
+vrepper/vrepConst.py
+vrepper/vrepper.py
 vrepper.egg-info/PKG-INFO
 vrepper.egg-info/SOURCES.txt
 vrepper.egg-info/dependency_links.txt
