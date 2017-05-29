@@ -51,3 +51,7 @@ If you are looking for:
 - ability to start/stop simulation repeatedly to perform all kinds of experiment
 
 Then vrepper has already paved the way for you. You should at least take a look at vrepper's source code.
+
+## Known Issues
+
+- On Linux after the end of the script the V-Rep process isn't killed properly. Workaround: run "killall vrep" manually after the script finishes.

@@ -209,6 +209,8 @@ class vrepper():
         # vrep.simxGetPingTime(clientID)
 
         # Now close the connection to V-REP:
+        if self.sim_running:
+            self.stop_simulation()
         self.simxFinish()
         self.instance.end()
         print('(vrepper) everything shut down.')
