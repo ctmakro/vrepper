@@ -1,5 +1,16 @@
 # vrepper
 
+THIS IS A FORK FROM https://github.com/ctmakro/vrepper, WITH SOME ADDITIONAL FEATURES:
+
+(I created a pull request to the original repo, but the author hasn't accepted yet)
+- Linux support
+- versioned V-Rep libraries, so you don't get any weird version conflicts
+- Python 2.7 support
+- access to joint angles (reading/writing)
+- access to synchronous/non-synchronous simuation
+- PEP-8 conformity 
+
+
 Tethered V-REP (using V-REP as a remote controlled multi-body simulator) in Python.
 
 The Python binding (`vrep.py` and `vrepConst.py`) and the driver libraries (`remoteApi.dll`, `remoteApi.dylib`, and `remoteApi.so`) are copied as-is from V-REP PRO EDU V3.4
