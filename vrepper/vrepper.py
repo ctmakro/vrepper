@@ -416,6 +416,16 @@ class vrepobject():
         )
         return -rad2deg(angle[0])
 
+    def get_joint_force(self):
+        self._check_joint()
+        force = check_ret(
+            self.env.simxGetJointForce(
+                self.handle,
+                blocking
+            )
+        )
+        return force
+
     def read_force_sensor(self):
         state, forceVector, torqueVector = check_ret(self.env.simxReadForceSensor(
             self.handle,
