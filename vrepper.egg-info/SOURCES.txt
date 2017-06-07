@@ -1,5 +1,0 @@
-vrepper.egg-info/PKG-INFO
-vrepper.egg-info/SOURCES.txt
-vrepper.egg-info/dependency_links.txt
-vrepper.egg-info/requires.txt
-vrepper.egg-info/top_level.txt
